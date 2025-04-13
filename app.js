@@ -3,8 +3,18 @@ const fs = require('fs');
 const path = require('path');
 const UserManager = require('./user-manager');
 
+// Create a log file
+const logFile = path.join(__dirname, 'app.log');
+fs.writeFileSync(logFile, 'Application started\n');
+
+function log(message) {
+    const timestamp = new Date().toISOString();
+    fs.appendFileSync(logFile, `[${timestamp}] ${message}\n`);
+}
+
 class ChastityTimer {
     constructor() {
+        log('Constructor started');
         this.userManager = new UserManager();
         this.startTime = null;
         this.timerInterval = null;
@@ -13,7 +23,27 @@ class ChastityTimer {
         this.stoppedEvents = new Set();
         this.logbookEntries = [];
         this.currentEventId = null;
+
+        // Wait for DOM to be fully loaded before initializing
+        if (document.readyState === 'loading') {
+            log('DOM is loading, waiting for DOMContentLoaded');
+            document.addEventListener('DOMContentLoaded', () => {
+                log('DOMContentLoaded fired');
+                this.initialize();
+            });
+        } else {
+            log('DOM already loaded, initializing immediately');
+            this.initialize();
+        }
+        log('Constructor finished');
+    }
+
+    initialize() {
+        log('Initialize started');
+        
+        // Initialize elements first
         this.initializeElements();
+        log('Elements initialized');
         
         // Set default value for date picker
         const now = new Date();
@@ -26,11 +56,18 @@ class ChastityTimer {
         this.timerDisplay.classList.add('hidden');
         this.stopTimerBtn.classList.add('hidden');
         
+        // Attach event listeners
         this.attachEventListeners();
-        this.checkAuthState();
+        log('Event listeners attached');
         
+        // Initialize profile handling
+        this.initializeProfileHandling();
+        log('Profile handling initialized');
+        
+        // Get user data path
         ipcRenderer.send('get-user-data-path');
         ipcRenderer.on('user-data-path', (event, path) => {
+            log('Received user data path');
             this.dataPath = path;
             this.loadSavedState();
         });
@@ -42,10 +79,37 @@ class ChastityTimer {
             }
         });
 
-        this.initializeProfileHandling();
+        // Check auth state
+        this.checkAuthState();
+        log('Auth state checked');
+        
+        log('Initialize finished');
     }
 
     initializeElements() {
+        // Add auth elements first
+        this.authContainer = document.getElementById('authContainer');
+        this.appContainer = document.getElementById('appContainer');
+        this.loginForm = document.getElementById('loginForm');
+        this.registerForm = document.getElementById('registerForm');
+        this.authTabs = document.querySelectorAll('.auth-tab');
+        this.rememberMeCheckbox = document.getElementById('rememberMe');
+        this.loginUsername = document.getElementById('loginUsername');
+        
+        // Ensure auth container is visible and app container is hidden
+        if (this.authContainer) {
+            this.authContainer.classList.remove('hidden');
+            this.appContainer.classList.add('hidden');
+        }
+        
+        // Restore remembered username if it exists
+        const rememberedUsername = localStorage.getItem('rememberedUsername');
+        if (rememberedUsername && this.loginUsername) {
+            this.loginUsername.value = rememberedUsername;
+            this.rememberMeCheckbox.checked = true;
+        }
+
+        // Initialize other elements
         this.startNowBtn = document.getElementById('startNow');
         this.startCustomBtn = document.getElementById('startCustom');
         this.customTimeContainer = document.getElementById('customTimeInput');
@@ -59,42 +123,10 @@ class ChastityTimer {
         
         // Initialize modal elements
         this.modal = document.getElementById('logbookModal');
-        console.log('Modal element:', this.modal); // Debug log
-        
         this.logbookForm = document.getElementById('logbookForm');
-        console.log('Form element:', this.logbookForm); // Debug log
-        
         this.closeButton = document.querySelector('.close-button');
         this.cancelButton = document.querySelector('.cancel-button');
         this.logbookEntriesList = document.getElementById('logbookEntriesList');
-
-        if (!this.modal || !this.logbookForm) {
-            console.error('Modal elements not found!');
-        }
-        
-        // Debug element initialization
-        console.log('Elements initialized:');
-        console.log('Start Now button:', this.startNowBtn);
-        console.log('Start Custom button:', this.startCustomBtn);
-        console.log('Date picker container:', this.customTimeContainer);
-        console.log('Timer display:', this.timerDisplay);
-        console.log('Stop button:', this.stopTimerBtn);
-
-        // Add auth elements
-        this.authContainer = document.getElementById('authContainer');
-        this.appContainer = document.getElementById('appContainer');
-        this.loginForm = document.getElementById('loginForm');
-        this.registerForm = document.getElementById('registerForm');
-        this.authTabs = document.querySelectorAll('.auth-tab');
-        this.rememberMeCheckbox = document.getElementById('rememberMe');
-        this.loginUsername = document.getElementById('loginUsername');
-        
-        // Restore remembered username if it exists
-        const rememberedUsername = localStorage.getItem('rememberedUsername');
-        if (rememberedUsername) {
-            this.loginUsername.value = rememberedUsername;
-            this.rememberMeCheckbox.checked = true;
-        }
 
         // Add profile elements
         this.avatarContainer = document.getElementById('avatarContainer');
@@ -184,22 +216,27 @@ class ChastityTimer {
         // Update profile info in dropdown
         const deviceName = profile.deviceType === 'custom' ? 
             profile.customDevice : 
-            this.deviceTypeSelect.options[this.deviceTypeSelect.selectedIndex].text;
+            this.deviceTypeSelect.options[this.deviceTypeSelect.selectedIndex]?.text || '';
 
         const profileInfo = this.avatarContainer.querySelector('.profile-info');
-        profileInfo.innerHTML = `
-            <span class="username">${profile.displayName || this.currentUser}</span>
-            <span class="keyholder-info">Keyholder: ${profile.keyholder}</span>
-            <span class="device-info">Device: ${deviceName}</span>
-        `;
+        if (profileInfo) {
+            profileInfo.innerHTML = `
+                <span class="username">${profile.displayName || this.currentUser}</span>
+                <span class="keyholder-info">Keyholder: ${profile.keyholder || 'self-locked'}</span>
+                <span class="device-info">Device: ${deviceName || 'Not set'}</span>
+            `;
+        }
 
         // Update timer border based on keyholder
         const timer = document.querySelector('.timer');
         if (timer) {
+            // Remove all existing classes first
+            timer.classList.remove('has-keyholder', 'self-locked');
+            
             if (profile.keyholder && profile.keyholder !== 'self-locked') {
                 timer.classList.add('has-keyholder');
             } else {
-                timer.classList.remove('has-keyholder');
+                timer.classList.add('self-locked');
             }
         }
     }
@@ -679,12 +716,30 @@ class ChastityTimer {
     }
 
     checkAuthState() {
-        // Only check session storage, not local storage
+        // First check session storage for active session
         const currentUser = sessionStorage.getItem('currentUser');
         if (currentUser) {
             this.handleAuthSuccess(currentUser, this.rememberMeCheckbox.checked);
+            return;
+        }
+
+        // If no active session, check for remembered username
+        const rememberedUsername = localStorage.getItem('rememberedUsername');
+        if (rememberedUsername) {
+            // Pre-fill the login form with remembered username
+            this.loginUsername.value = rememberedUsername;
+            this.rememberMeCheckbox.checked = true;
+            // Focus the password field
+            const passwordField = document.getElementById('loginPassword');
+            if (passwordField) {
+                passwordField.focus();
+            }
         } else {
             this.logout();
+            // Focus the username field
+            if (this.loginUsername) {
+                this.loginUsername.focus();
+            }
         }
     }
 }
@@ -692,5 +747,16 @@ class ChastityTimer {
 // Initialize the timer when the page loads
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM loaded, initializing timer');
-    new ChastityTimer();
+    const timer = new ChastityTimer();
+    
+    // Force form focus immediately after initialization
+    const loginUsername = document.getElementById('loginUsername');
+    const loginPassword = document.getElementById('loginPassword');
+    const rememberedUsername = localStorage.getItem('rememberedUsername');
+    
+    if (rememberedUsername && loginPassword) {
+        loginPassword.focus();
+    } else if (loginUsername) {
+        loginUsername.focus();
+    }
 }); 

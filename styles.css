@@ -125,6 +125,25 @@ h1 {
 
 .timer.has-keyholder {
     border-color: #2ecc71;
+    box-shadow: 0 2px 5px rgba(46, 204, 113, 0.2);
+}
+
+.timer.self-locked {
+    border-color: #e74c3c;
+    box-shadow: 0 2px 5px rgba(231, 76, 60, 0.2);
+}
+
+.timer.self-locked::after {
+    content: 'Self-Locked';
+    position: absolute;
+    top: -12px;
+    right: 10px;
+    background-color: #e74c3c;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
 }
 
 .logbook-icon {
@@ -658,23 +677,4 @@ h1 {
 .profile-info .device-info {
     font-size: 0.9rem;
     color: #7f8c8d;
-}
-
-/* Add styles for self-locked state */
-.timer.self-locked {
-    border: 3px solid #e74c3c;
-    position: relative;
-}
-
-.timer.self-locked::after {
-    content: 'Self-Locked';
-    position: absolute;
-    top: -12px;
-    right: 10px;
-    background-color: #e74c3c;
-    color: white;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    font-weight: 500;
 } 

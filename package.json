@@ -28,6 +28,8 @@
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
-    "electron-store": "^8.1.0"
+    "electron-store": "^8.1.0",
+    "npm": "^11.3.0",
+    "start": "^5.1.0"
   }
-} 
+}
