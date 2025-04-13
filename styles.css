@@ -562,4 +562,77 @@ h1 {
 .timer-container {
     position: relative;
     z-index: 1;
+}
+
+/* Update profile dropdown styles */
+.profile-button,
+.logout-button {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.profile-button {
+    color: #2c3e50;
+}
+
+.profile-button:hover {
+    background-color: #f8f9fa;
+}
+
+/* Profile form styles */
+.form-group select {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+    background-color: white;
+}
+
+#customDeviceGroup {
+    margin-top: 0.5rem;
+}
+
+.profile-info {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.profile-info .keyholder-info {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+}
+
+.profile-info .device-info {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+}
+
+/* Add styles for self-locked state */
+.timer.self-locked {
+    border: 3px solid #e74c3c;
+    position: relative;
+}
+
+.timer.self-locked::after {
+    content: 'Self-Locked';
+    position: absolute;
+    top: -12px;
+    right: 10px;
+    background-color: #e74c3c;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
 } 

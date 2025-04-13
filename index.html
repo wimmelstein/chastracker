@@ -20,6 +20,13 @@
                         <div class="profile-info">
                             <span class="username"></span>
                         </div>
+                        <button class="profile-button">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            Profile Settings
+                        </button>
                         <button class="logout-button">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -152,6 +159,45 @@
                 <h3>Previous Entries</h3>
                 <div id="logbookEntriesList"></div>
             </div>
+        </div>
+    </div>
+
+    <!-- Add Profile Modal -->
+    <div id="profileModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Profile Settings</h2>
+                <button class="close-button">&times;</button>
+            </div>
+            <form id="profileForm">
+                <div class="form-group">
+                    <label for="displayName">Display Name</label>
+                    <input type="text" id="displayName" required>
+                </div>
+                <div class="form-group">
+                    <label for="keyholder">Keyholder</label>
+                    <input type="text" id="keyholder" placeholder="Leave empty for self-locked">
+                </div>
+                <div class="form-group">
+                    <label for="deviceType">Chastity Device</label>
+                    <select id="deviceType" required>
+                        <option value="">Select a device type</option>
+                        <option value="cb6000">CB-6000</option>
+                        <option value="holyTrainer">Holy Trainer</option>
+                        <option value="viceLarge">Vice Large</option>
+                        <option value="viceSmall">Vice Small</option>
+                        <option value="custom">Other (Custom)</option>
+                    </select>
+                </div>
+                <div id="customDeviceGroup" class="form-group hidden">
+                    <label for="customDevice">Custom Device Name</label>
+                    <input type="text" id="customDevice">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="button">Save Changes</button>
+                    <button type="button" class="button cancel-button">Cancel</button>
+                </div>
+            </form>
         </div>
     </div>
 

@@ -41,6 +41,8 @@ class ChastityTimer {
                 this.logout();
             }
         });
+
+        this.initializeProfileHandling();
     }
 
     initializeElements() {
@@ -99,9 +101,96 @@ class ChastityTimer {
         this.avatarLetter = this.avatarContainer.querySelector('.avatar-letter');
         this.usernameDisplay = this.avatarContainer.querySelector('.username');
         this.logoutButton = this.avatarContainer.querySelector('.logout-button');
+        this.profileModal = document.getElementById('profileModal');
+        this.profileForm = document.getElementById('profileForm');
+        this.profileButton = this.avatarContainer.querySelector('.profile-button');
+        this.deviceTypeSelect = document.getElementById('deviceType');
+        this.customDeviceGroup = document.getElementById('customDeviceGroup');
+        this.customDeviceInput = document.getElementById('customDevice');
         
         // Initially hide the profile
         this.avatarContainer.classList.add('hidden');
+    }
+
+    initializeProfileHandling() {
+        // Handle device type selection
+        this.deviceTypeSelect.addEventListener('change', (e) => {
+            if (e.target.value === 'custom') {
+                this.customDeviceGroup.classList.remove('hidden');
+                this.customDeviceInput.required = true;
+            } else {
+                this.customDeviceGroup.classList.add('hidden');
+                this.customDeviceInput.required = false;
+            }
+        });
+
+        // Handle profile form submission
+        this.profileForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const profile = {
+                displayName: document.getElementById('displayName').value,
+                keyholder: document.getElementById('keyholder').value || 'self-locked',
+                deviceType: this.deviceTypeSelect.value,
+                customDevice: this.deviceTypeSelect.value === 'custom' ? 
+                    this.customDeviceInput.value : null
+            };
+
+            this.saveProfile(profile);
+            this.updateProfileDisplay(profile);
+            this.profileModal.classList.add('hidden');
+        });
+
+        // Show profile modal
+        this.profileButton.addEventListener('click', () => {
+            this.loadProfile();
+            this.profileModal.classList.remove('hidden');
+        });
+
+        // Close modal handlers
+        const closeButtons = this.profileModal.querySelectorAll('.close-button, .cancel-button');
+        closeButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                this.profileModal.classList.add('hidden');
+            });
+        });
+    }
+
+    saveProfile(profile) {
+        localStorage.setItem(`profile_${this.currentUser}`, JSON.stringify(profile));
+    }
+
+    loadProfile() {
+        const profile = JSON.parse(localStorage.getItem(`profile_${this.currentUser}`) || '{}');
+        
+        document.getElementById('displayName').value = profile.displayName || '';
+        document.getElementById('keyholder').value = profile.keyholder || '';
+        this.deviceTypeSelect.value = profile.deviceType || '';
+        
+        if (profile.deviceType === 'custom') {
+            this.customDeviceGroup.classList.remove('hidden');
+            this.customDeviceInput.value = profile.customDevice || '';
+        }
+
+        // Update timer display
+        this.updateProfileDisplay(profile);
+    }
+
+    updateProfileDisplay(profile) {
+        const deviceName = profile.deviceType === 'custom' ? 
+            profile.customDevice : 
+            this.deviceTypeSelect.options[this.deviceTypeSelect.selectedIndex].text;
+
+        const profileInfo = this.avatarContainer.querySelector('.profile-info');
+        profileInfo.innerHTML = `
+            <span class="username">${profile.displayName || this.currentUser}</span>
+            <span class="keyholder-info">Keyholder: ${profile.keyholder}</span>
+            <span class="device-info">Device: ${deviceName}</span>
+        `;
+
+        // Update timer display based on self-locked status
+        const isSelfLocked = !profile.keyholder || profile.keyholder === 'self-locked';
+        this.timerDisplay.classList.toggle('self-locked', isSelfLocked);
     }
 
     showStartButtons() {
@@ -564,6 +653,10 @@ class ChastityTimer {
         
         // Store current session
         sessionStorage.setItem('currentUser', username);
+
+        this.currentUser = username;
+        const profile = JSON.parse(localStorage.getItem(`profile_${username}`) || '{}');
+        this.updateProfileDisplay(profile);
     }
 
     logout() {
