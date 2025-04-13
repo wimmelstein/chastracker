@@ -5,9 +5,11 @@ class UserManager {
     constructor() {
         this.store = new Store();
         this.users = this.store.get('users') || {};
+        console.log('Initial users:', this.users);
     }
 
     async register(username, password) {
+        console.log('Registering user:', username);
         if (this.users[username]) {
             throw new Error('Username already exists');
         }
@@ -21,20 +23,30 @@ class UserManager {
         };
 
         this.store.set('users', this.users);
+        console.log('Users after registration:', this.store.get('users'));
         return true;
     }
 
     async login(username, password) {
+        console.log('Attempting login for user:', username);
+        console.log('Available users:', this.users);
         const user = this.users[username];
+        
         if (!user) {
-            throw new Error('User not found');
+            console.log('User not found');
+            throw new Error('Invalid credentials');
         }
 
+        console.log('Found user, comparing password...');
         const isValid = await bcrypt.compare(password, user.passwordHash);
+        console.log('Password comparison result:', isValid);
+        
         if (!isValid) {
-            throw new Error('Invalid password');
+            console.log('Invalid password');
+            throw new Error('Invalid credentials');
         }
 
+        console.log('Login successful');
         return true;
     }
 }

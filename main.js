@@ -16,10 +16,22 @@ function createWindow() {
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false
-        }
+        },
+        show: true,
+        icon: path.join(__dirname, 'icon.png'),
+        frame: true,
+        titleBarStyle: 'hiddenInset'
     });
 
     mainWindow.loadFile('index.html');
+    
+    mainWindow.on('ready-to-show', () => {
+        mainWindow.show();
+    });
+
+    mainWindow.on('closed', () => {
+        mainWindow = null;
+    });
 
     // Create application menu
     const template = [
@@ -67,14 +79,6 @@ function createWindow() {
 
     const menu = Menu.buildFromTemplate(template);
     Menu.setApplicationMenu(menu);
-
-    // Handle window close
-    mainWindow.on('close', (event) => {
-        if (!app.isQuitting) {
-            event.preventDefault();
-            mainWindow.hide();
-        }
-    });
 }
 
 // Handle IPC messages

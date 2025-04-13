@@ -177,6 +177,11 @@ class ChastityTimer {
     }
 
     updateProfileDisplay(profile) {
+        // Update avatar and username
+        this.avatarLetter.textContent = (profile.displayName || this.currentUser).charAt(0);
+        this.usernameDisplay.textContent = profile.displayName || this.currentUser;
+
+        // Update profile info in dropdown
         const deviceName = profile.deviceType === 'custom' ? 
             profile.customDevice : 
             this.deviceTypeSelect.options[this.deviceTypeSelect.selectedIndex].text;
@@ -188,9 +193,15 @@ class ChastityTimer {
             <span class="device-info">Device: ${deviceName}</span>
         `;
 
-        // Update timer display based on self-locked status
-        const isSelfLocked = !profile.keyholder || profile.keyholder === 'self-locked';
-        this.timerDisplay.classList.toggle('self-locked', isSelfLocked);
+        // Update timer border based on keyholder
+        const timer = document.querySelector('.timer');
+        if (timer) {
+            if (profile.keyholder && profile.keyholder !== 'self-locked') {
+                timer.classList.add('has-keyholder');
+            } else {
+                timer.classList.remove('has-keyholder');
+            }
+        }
     }
 
     showStartButtons() {

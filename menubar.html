@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            margin: 0;
+            padding: 8px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #333;
+        }
+        #timer {
+            font-size: 14px;
+            text-align: center;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 8px;
+        }
+        button {
+            font-size: 12px;
+            padding: 4px 8px;
+        }
+    </style>
+</head>
+<body>
+    <div id="timer">Loading...</div>
+    <div class="controls">
+        <button onclick="showMainWindow()">Open App</button>
+        <button onclick="quitApp()">Quit</button>
+    </div>
+    <script>
+        const { ipcRenderer } = require('electron');
+        
+        ipcRenderer.on('update-timer', (event, time) => {
+            document.getElementById('timer').textContent = time;
+        });
+
+        function showMainWindow() {
+            ipcRenderer.send('show-main-window');
+        }
+
+        function quitApp() {
+            ipcRenderer.send('quit-app');
+        }
+    </script>
+</body>
+</html> 
