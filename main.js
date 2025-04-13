@@ -1,7 +1,11 @@
 const { app, BrowserWindow, Menu, ipcMain } = require('electron');
 const path = require('path');
+const Store = require('electron-store');
 
 let mainWindow;
+
+// Initialize store
+Store.initRenderer();
 
 function createWindow() {
     mainWindow = new BrowserWindow({
@@ -110,4 +114,5 @@ app.on('window-all-closed', () => {
 // Handle app quit
 app.on('before-quit', () => {
     app.isQuitting = true;
+    mainWindow.webContents.send('app-quit');
 }); 

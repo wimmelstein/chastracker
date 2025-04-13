@@ -8,51 +8,122 @@
 </head>
 <body>
     <div class="container">
-        <h1>Chastracker</h1>
-        <div class="timer-container">
-            <div id="timerDisplay" class="timer hidden">
-                <div class="time-unit">
-                    <span id="days">00</span>
-                    <span class="label">days</span>
+        <div class="header">
+            <h1>Chastracker</h1>
+            <div class="user-profile">
+                <div class="avatar-container" id="avatarContainer">
+                    <div class="avatar">
+                        <!-- Default avatar shows first letter of username -->
+                        <span class="avatar-letter"></span>
+                    </div>
+                    <div class="profile-dropdown">
+                        <div class="profile-info">
+                            <span class="username"></span>
+                        </div>
+                        <button class="logout-button">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                <polyline points="16 17 21 12 16 7"></polyline>
+                                <line x1="21" y1="12" x2="9" y2="12"></line>
+                            </svg>
+                            Logout
+                        </button>
+                    </div>
                 </div>
-                <div class="time-unit">
-                    <span id="hours">00</span>
-                    <span class="label">hours</span>
-                </div>
-                <div class="time-unit">
-                    <span id="minutes">00</span>
-                    <span class="label">minutes</span>
-                </div>
-                <div class="time-unit">
-                    <span id="seconds">00</span>
-                    <span class="label">seconds</span>
-                </div>
-                <div class="logbook-icon hidden">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                        <line x1="8" y1="7" x2="16" y2="7"></line>
-                        <line x1="8" y1="12" x2="16" y2="12"></line>
-                        <line x1="8" y1="17" x2="12" y2="17"></line>
-                    </svg>
-                </div>
-            </div>
-            <div class="button-container">
-                <button id="startNow" class="button">Start Now</button>
-                <button id="startCustom" class="button">Start at Custom Time</button>
-                <button id="stopTimer" class="button hidden">Stop Timer</button>
             </div>
         </div>
-        <div id="customTimeInput" class="custom-time-container hidden">
-            <input type="datetime-local" id="customDateTime">
-            <button id="confirmCustom" class="button">Confirm</button>
-        </div>
-        <div class="events-section">
-            <div class="events-header">
-                <h2>Past Events</h2>
-                <button id="clearEvents" class="button clear-button">Clear History</button>
+        
+        <!-- Add auth container -->
+        <div id="authContainer" class="auth-container">
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">Login</button>
+                <button class="auth-tab" data-tab="register">Register</button>
             </div>
-            <div id="eventsList" class="events-list"></div>
+            
+            <form id="loginForm" class="auth-form">
+                <div class="form-group">
+                    <label for="loginUsername">Username</label>
+                    <input type="text" id="loginUsername" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <div class="form-group checkbox">
+                    <label>
+                        <input type="checkbox" id="rememberMe">
+                        Remember me
+                    </label>
+                </div>
+                <button type="submit" class="button">Login</button>
+                <div class="error-message" id="loginError"></div>
+            </form>
+
+            <form id="registerForm" class="auth-form hidden">
+                <div class="form-group">
+                    <label for="registerUsername">Username</label>
+                    <input type="text" id="registerUsername" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Password</label>
+                    <input type="password" id="registerPassword" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" required>
+                </div>
+                <button type="submit" class="button">Register</button>
+                <div class="error-message" id="registerError"></div>
+            </form>
+        </div>
+
+        <!-- Wrap existing content in app container -->
+        <div id="appContainer" class="app-container hidden">
+            <div class="timer-container">
+                <div id="timerDisplay" class="timer hidden">
+                    <div class="time-unit">
+                        <span id="days">00</span>
+                        <span class="label">days</span>
+                    </div>
+                    <div class="time-unit">
+                        <span id="hours">00</span>
+                        <span class="label">hours</span>
+                    </div>
+                    <div class="time-unit">
+                        <span id="minutes">00</span>
+                        <span class="label">minutes</span>
+                    </div>
+                    <div class="time-unit">
+                        <span id="seconds">00</span>
+                        <span class="label">seconds</span>
+                    </div>
+                    <div class="logbook-icon hidden">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                            <line x1="8" y1="7" x2="16" y2="7"></line>
+                            <line x1="8" y1="12" x2="16" y2="12"></line>
+                            <line x1="8" y1="17" x2="12" y2="17"></line>
+                        </svg>
+                    </div>
+                </div>
+                <div class="button-container">
+                    <button id="startNow" class="button">Start Now</button>
+                    <button id="startCustom" class="button">Start at Custom Time</button>
+                    <button id="stopTimer" class="button hidden">Stop Timer</button>
+                </div>
+            </div>
+            <div id="customTimeInput" class="custom-time-container hidden">
+                <input type="datetime-local" id="customDateTime">
+                <button id="confirmCustom" class="button">Confirm</button>
+            </div>
+            <div class="events-section">
+                <div class="events-header">
+                    <h2>Past Events</h2>
+                    <button id="clearEvents" class="button clear-button">Clear History</button>
+                </div>
+                <div id="eventsList" class="events-list"></div>
+            </div>
         </div>
     </div>
 

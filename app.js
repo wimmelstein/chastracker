@@ -1,9 +1,11 @@
 const { ipcRenderer } = require('electron');
 const fs = require('fs');
 const path = require('path');
+const UserManager = require('./user-manager');
 
 class ChastityTimer {
     constructor() {
+        this.userManager = new UserManager();
         this.startTime = null;
         this.timerInterval = null;
         this.dataPath = null;
@@ -25,11 +27,19 @@ class ChastityTimer {
         this.stopTimerBtn.classList.add('hidden');
         
         this.attachEventListeners();
+        this.checkAuthState();
         
         ipcRenderer.send('get-user-data-path');
         ipcRenderer.on('user-data-path', (event, path) => {
             this.dataPath = path;
             this.loadSavedState();
+        });
+
+        // Handle app quit
+        window.addEventListener('beforeunload', () => {
+            if (!document.getElementById('rememberMe').checked) {
+                this.logout();
+            }
         });
     }
 
@@ -67,6 +77,31 @@ class ChastityTimer {
         console.log('Date picker container:', this.customTimeContainer);
         console.log('Timer display:', this.timerDisplay);
         console.log('Stop button:', this.stopTimerBtn);
+
+        // Add auth elements
+        this.authContainer = document.getElementById('authContainer');
+        this.appContainer = document.getElementById('appContainer');
+        this.loginForm = document.getElementById('loginForm');
+        this.registerForm = document.getElementById('registerForm');
+        this.authTabs = document.querySelectorAll('.auth-tab');
+        this.rememberMeCheckbox = document.getElementById('rememberMe');
+        this.loginUsername = document.getElementById('loginUsername');
+        
+        // Restore remembered username if it exists
+        const rememberedUsername = localStorage.getItem('rememberedUsername');
+        if (rememberedUsername) {
+            this.loginUsername.value = rememberedUsername;
+            this.rememberMeCheckbox.checked = true;
+        }
+
+        // Add profile elements
+        this.avatarContainer = document.getElementById('avatarContainer');
+        this.avatarLetter = this.avatarContainer.querySelector('.avatar-letter');
+        this.usernameDisplay = this.avatarContainer.querySelector('.username');
+        this.logoutButton = this.avatarContainer.querySelector('.logout-button');
+        
+        // Initially hide the profile
+        this.avatarContainer.classList.add('hidden');
     }
 
     showStartButtons() {
@@ -202,6 +237,69 @@ class ChastityTimer {
             }
             
             this.modal.classList.add('hidden');
+        });
+
+        // Add auth event listeners
+        this.loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = this.loginUsername.value;
+            const password = document.getElementById('loginPassword').value;
+            const rememberMe = this.rememberMeCheckbox.checked;
+            
+            try {
+                await this.userManager.login(username, password);
+                this.handleAuthSuccess(username, rememberMe);
+            } catch (error) {
+                document.getElementById('loginError').textContent = error.message;
+            }
+        });
+
+        this.registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('registerUsername').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                document.getElementById('registerError').textContent = 'Passwords do not match';
+                return;
+            }
+            
+            try {
+                await this.userManager.register(username, password);
+                this.handleAuthSuccess(username);
+            } catch (error) {
+                document.getElementById('registerError').textContent = error.message;
+            }
+        });
+
+        this.authTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const targetForm = tab.dataset.tab;
+                this.authTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                if (targetForm === 'login') {
+                    this.loginForm.classList.remove('hidden');
+                    this.registerForm.classList.add('hidden');
+                } else {
+                    this.loginForm.classList.add('hidden');
+                    this.registerForm.classList.remove('hidden');
+                }
+            });
+        });
+
+        // Clear remembered username when remember me is unchecked
+        this.rememberMeCheckbox.addEventListener('change', (e) => {
+            if (!e.target.checked) {
+                localStorage.removeItem('rememberedUsername');
+            }
+        });
+
+        // Add logout handler
+        this.logoutButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.logout();
         });
     }
 
@@ -446,6 +544,44 @@ class ChastityTimer {
         this.modal.classList.remove('hidden');
         this.logbookForm.reset();
         this.updateLogbookEntriesList();
+    }
+
+    handleAuthSuccess(username, rememberMe) {
+        this.authContainer.classList.add('hidden');
+        this.appContainer.classList.remove('hidden');
+        
+        // Update profile UI
+        this.avatarContainer.classList.remove('hidden');
+        this.avatarLetter.textContent = username.charAt(0);
+        this.usernameDisplay.textContent = username;
+        
+        // Store username if remember me is checked
+        if (rememberMe) {
+            localStorage.setItem('rememberedUsername', username);
+        } else {
+            localStorage.removeItem('rememberedUsername');
+        }
+        
+        // Store current session
+        sessionStorage.setItem('currentUser', username);
+    }
+
+    logout() {
+        sessionStorage.removeItem('currentUser');
+        document.getElementById('loginPassword').value = ''; // Clear password field
+        this.authContainer.classList.remove('hidden');
+        this.appContainer.classList.add('hidden');
+        this.avatarContainer.classList.add('hidden');
+    }
+
+    checkAuthState() {
+        // Only check session storage, not local storage
+        const currentUser = sessionStorage.getItem('currentUser');
+        if (currentUser) {
+            this.handleAuthSuccess(currentUser, this.rememberMeCheckbox.checked);
+        } else {
+            this.logout();
+        }
     }
 }
 

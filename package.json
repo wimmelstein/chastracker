@@ -25,5 +25,9 @@
     "win": {
       "target": "dir"
     }
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "electron-store": "^8.1.0"
   }
 } 
