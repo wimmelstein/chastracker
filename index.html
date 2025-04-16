@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';">
     <title>Chastity Timer</title>
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -118,6 +119,7 @@
                     <button id="startNow" class="button">Start Now</button>
                     <button id="startCustom" class="button">Start at Custom Time</button>
                     <button id="stopTimer" class="button hidden">Stop Timer</button>
+                    <button id="pauseTimer" class="button hidden">Pause Timer</button>
                 </div>
             </div>
             <div id="customTimeInput" class="custom-time-container hidden">
@@ -201,6 +203,26 @@
         </div>
     </div>
 
-    <script src="app.js"></script>
+    <!-- Unlock Reason Modal -->
+    <div id="unlockReasonModal" class="modal hidden">
+        <div class="modal-content">
+            <h2>Select Unlock Reason</h2>
+            <div class="reason-buttons">
+                <button class="reason-button" data-reason="physician">Physician Visit</button>
+                <button class="reason-button" data-reason="cleaning">Cleaning</button>
+                <button class="reason-button" data-reason="emergency">Emergency</button>
+                <button class="reason-button" data-reason="other">Other</button>
+            </div>
+            <div id="otherReasonInput" class="other-reason-input hidden">
+                <input type="text" id="customReason" placeholder="Enter reason...">
+            </div>
+            <div class="modal-buttons">
+                <button id="confirmUnlock" class="button">Confirm</button>
+                <button id="cancelUnlock" class="button">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="src/app.js"></script>
 </body>
 </html> 

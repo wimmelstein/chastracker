@@ -2,7 +2,8 @@
   "name": "chastity-timer",
   "version": "1.0.0",
   "description": "Desktop application for tracking chastity device time",
-  "main": "main.js",
+  "main": "src/main.js",
+  "type": "module",
   "scripts": {
     "start": "electron .",
     "build": "electron-builder --dir"
