@@ -144,13 +144,24 @@ class EventManager {
             return;
         }
 
-        // Update the logbook icon indicator
-        const logbookIcon = document.querySelector('.logbook-icon');
-        if (logbookIcon) {
-            if (event.logbook.length > 0) {
-                logbookIcon.classList.add('has-entries');
+        // Update the logbook icon indicator for the active timer
+        const activeTimerIcon = document.querySelector('#timerDisplay .logbook-icon');
+        if (activeTimerIcon) {
+            const activeEvent = this.events.find(e => e.type === 'timer_start' && !e.endDate);
+            if (activeEvent && activeEvent.logbook && activeEvent.logbook.length > 0) {
+                activeTimerIcon.classList.add('has-entries');
             } else {
-                logbookIcon.classList.remove('has-entries');
+                activeTimerIcon.classList.remove('has-entries');
+            }
+        }
+
+        // Update the logbook icon indicator for the current event in the modal
+        const currentEventIcon = document.querySelector(`.event-item[data-id="${this.currentEventId}"] .logbook-icon`);
+        if (currentEventIcon) {
+            if (event.logbook.length > 0) {
+                currentEventIcon.classList.add('has-entries');
+            } else {
+                currentEventIcon.classList.remove('has-entries');
             }
         }
 
